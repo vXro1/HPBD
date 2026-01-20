@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti, mi amor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #87CEEB 0%, #B0E0E6 100%);
+            min-height: 100vh;
+        }
+
+        /* PANTALLA DE BUZÓN */
+        .envelope-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: opacity 0.8s ease;
+            padding: 20px;
+        }
+
+        .envelope-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* BUZÓN */
+        .envelope-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            height: 480px;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+
+        .mailbox {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* POSTE DEL BUZÓN */
+        .mailbox-post {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 180px;
+            background: linear-gradient(to right, #8B4513, #A0522D, #8B4513);
+            border-radius: 4px;
+            box-shadow:
+                0 5px 15px rgba(0, 0, 0, 0.3),
+                inset -3px 0 8px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        /* BASE DEL BUZÓN */
+        .mailbox-base {
+            position: absolute;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 320px;
+            height: 250px;
+            background: linear-gradient(135deg, #4682B4, #5a9fd4);
+            border: 4px solid #d4af37;
+            border-radius: 20px 20px 8px 8px;
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.4),
+                inset 0 -30px 40px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        /* TAPA SUPERIOR DEL BUZÓN */
+        .mailbox-top {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 105%;
+            height: 80px;
+            background: linear-gradient(to bottom, #5a9fd4, #87CEEB);
+            border: 4px solid #d4af37;
+            border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+            box-shadow:
+                0 -10px 25px rgba(0, 0, 0, 0.3),
+                inset 0 -15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* DETALLE DE VENTANITA */
+        .mailbox-window {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid #d4af37;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* PUERTA DEL BUZÓN */
+        .mailbox-door {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            height: 160px;
+            background: linear-gradient(to bottom, #87CEEB, #5a9fd4);
+            border: 4px solid #d4af37;
+            border-radius: 12px;
+            transform-origin: bottom;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, 0.3),
+                inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            z-index: 3;
+        }
+
+        .mailbox-door.open {
+            transform: translateX(-50%) rotateX(-120deg);
+        }
+
+        /* MANIJA DE LA PUERTA */
+        .door-handle {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            width: 25px;
+            height: 8px;
+            background: linear-gradient(to bottom, #FFD700, #d4af37);
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .door-handle::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: #d4af37;
+            border-radius: 50%;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* CARTA DENTRO */
+        .letter-preview {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 60px);
+            height: 140px;
+            background: linear-gradient(to bottom, #fffef9, #fefcf3);
+            border: 3px solid #e8d7b5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #4682B4;
+            font-style: italic;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+            transition: transform 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.4s;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .letter-preview.pull-out {
+            transform: translateX(-50%) translateY(-280px) scale(1.05);
+            z-index: 5;
+        }
+
+        /* BOTÓN CORAZÓN */
+        .heart-button {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: 4px solid #d4af37;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 4;
+            transition: all 0.3s ease, opacity 0.5s ease;
+            box-shadow:
+                0 10px 30px rgba(212, 175, 55, 0.5),
+                0 0 25px rgba(255, 215, 0, 0.4);
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        .heart-button:hover {
+            transform: translateX(-50%) scale(1.15);
+            box-shadow:
+                0 12px 35px rgba(212, 175, 55, 0.7),
+                0 0 35px rgba(255, 215, 0, 0.6);
+        }
+
+        .heart-button i {
+            font-size: 36px;
+            color: white;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.08);
+            }
+        }
+
+        /* MENSAJE TIPOGRÁFICO */
+        .typed-message {
+            margin-top: 40px;
+            font-size: 1.8rem;
+            color: white;
+            text-align: center;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            font-style: italic;
+            min-height: 60px;
+            padding: 0 20px;
+        }
+
+        /* BOTÓN "ÁBREME" */
+        .open-letter-btn {
+            margin-top: 30px;
+            padding: 16px 45px;
+            font-size: 1.3rem;
+            background: white;
+            color: #4682B4;
+            border: 3px solid #d4af37;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .open-letter-btn.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .open-letter-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+            background: #fffef9;
+        }
+
+        /* PANTALLA DE CARTA */
+        .letter-screen {
+            display: none;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .letter-screen.active {
+            display: block;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* CARTA COMPLETA */
+        .letter-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: white;
+            border: 3px solid #d4af37;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* ENCABEZADO DE CARTA */
+        .letter-header {
+            background: linear-gradient(135deg, #87CEEB, #4682B4);
+            padding: 40px;
+            border-radius: 9px 9px 0 0;
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+        }
+
+        .letter-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: normal;
+            font-style: italic;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .letter-header .subtitle {
+            color: #fffef9;
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        /* CONTENIDO DE SECCIÓN */
+        .letter-content {
+            padding: 50px 60px;
+            background: linear-gradient(to bottom, #fffef9, #fefcf3);
+            background-image: repeating-linear-gradient(transparent,
+                    transparent 29px,
+                    rgba(212, 175, 55, 0.08) 29px,
+                    rgba(212, 175, 55, 0.08) 30px);
+        }
+
+        .section-part {
+            display: none;
+            animation: slideIn 0.8s ease;
+        }
+
+        .section-part.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-part h2 {
+            color: #4682B4;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            font-weight: normal;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-part h2 i {
+            color: #d4af37;
+            font-size: 1.6rem;
+        }
+
+        .section-part p {
+            font-size: 1.2rem;
+            line-height: 2;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+
+        .section-part p:first-of-type:first-letter {
+            font-size: 3.5rem;
+            font-weight: normal;
+            color: #4682B4;
+            float: left;
+            margin-right: 10px;
+            line-height: 0.9;
+        }
+
+        /* NAVEGACIÓN */
+        .letter-navigation {
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 0 0 9px 9px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid #e8d7b5;
+        }
+
+        .nav-button {
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #87CEEB, #4682B4);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(70, 130, 180, 0.3);
+        }
+
+        .nav-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(70, 130, 180, 0.4);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* INDICADOR DE PROGRESO */
+        .progress-dots {
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #4682B4;
+            transform: scale(1.4);
+            box-shadow: 0 0 10px rgba(70, 130, 180, 0.6);
+        }
+
+        /* SECCIÓN DEL PASTEL */
+        .cake-section {
+            display: none;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .cake-section.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 1s ease;
+        }
+
+        .cake-title {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 10px rgba(135, 206, 235, 0.5);
+            font-style: italic;
+            font-weight: normal;
+        }
+
+        .cake-subtitle {
+            font-size: 1.2rem;
+            color: #B0C4DE;
+            margin-bottom: 50px;
+            font-style: italic;
+        }
+
+        /* PASTEL */
+        .cake-container {
+            position: relative;
+            width: 350px;
+            height: 450px;
+            margin: 30px auto;
+        }
+
+        .cake {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .cake-plate {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 12px;
+            background: linear-gradient(to bottom, #d4af37, #c5a028);
+            border-radius: 50%;
+            box-shadow: 0 3px 15px rgba(212, 175, 55, 0.4);
+            border: 2px solid #b8941f;
+        }
+
+        .cake-layer {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2), 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 2px solid #d4af37;
+        }
+
+        .layer1 {
+            bottom: 12px;
+            width: 85%;
+            height: 120px;
+            background: linear-gradient(to bottom, #A8D5E2, #87CEEB, #7ab8d4);
+            z-index: 2;
+        }
+
+        .layer2 {
+            bottom: 132px;
+            width: 65%;
+            height: 110px;
+            background: linear-gradient(to bottom, #6FA8DC, #5F9EA0, #5290a8);
+            z-index: 3;
+        }
+
+        .layer3 {
+            bottom: 242px;
+            width: 48%;
+            height: 100px;
+            background: linear-gradient(to bottom, #5B9BD5, #4682B4, #3d729c);
+            z-index: 4;
+        }
+
+        .frosting {
+            position: absolute;
+            top: -8px;
+            left: -2px;
+            right: -2px;
+            height: 16px;
+            background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+            border-radius: 50%;
+            border: 2px solid #d4af37;
+            box-shadow: 0 -2px 10px rgba(255, 255, 255, 0.6);
+        }
+
+        .candles-container {
+            position: absolute;
+            top: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 150px;
+        }
+
+        .candle {
+            width: 10px;
+            height: 50px;
+            background: linear-gradient(to bottom, #ffffff, #f5f5f5, #A8D5E2, #87CEEB);
+            border-radius: 3px;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            border: 1px solid #d4af37;
+        }
+
+        .candle:hover {
+            transform: scale(1.1);
+        }
+
+        .wick {
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 6px;
+            background: #1a1a1a;
+        }
+
+        .flame {
+            width: 16px;
+            height: 24px;
+            background: radial-gradient(ellipse at center, #FFFACD, #FFD700, #FFA500, #FF6347);
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 0.3s ease-in-out infinite;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .flame.blown {
+            animation: blowOut 0.5s ease forwards;
+        }
+
+        @keyframes flicker {
+            0%, 100% {
+                transform: translateX(-50%) scaleY(1);
+            }
+            50% {
+                transform: translateX(-50%) scaleY(0.95);
+            }
+        }
+
+        @keyframes blowOut {
+            0% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) scale(0) translateY(-20px);
+            }
+        }
+
+        .cake-topper {
+            position: absolute;
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            color: #d4af37;
+            animation: rotate 5s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5));
+        }
+
+        @keyframes rotate {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        .blow-instruction {
+            color: #B0C4DE;
+            font-size: 1.3rem;
+            margin-top: 80px;
+            animation: blink 1.8s ease-in-out infinite;
+            font-style: italic;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .final-message {
+            max-width: 800px;
+            background: white;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            margin-top: 50px;
+            display: none;
+            border: 3px solid #d4af37;
+        }
+
+        .final-message.show {
+            display: block;
+            animation: fadeInScale 1s ease;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .final-message p {
+            line-height: 1.9;
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .signature {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #4682B4;
+            margin-top: 35px;
+            font-style: italic;
+        }
+
+        /* VIDEO CONTAINERS */
+        .video-container {
+            max-width: 800px;
+            margin: 40px auto 0;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 3px solid #d4af37;
+            display: none;
+        }
+
+        .video-container.show {
+            display: block;
+            animation: fadeInScale 1s ease;
+        }
+
+        .video-title {
+            color: #4682B4;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .dedication-section {
+            max-width: 800px;
+            margin: 30px auto 0;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 3px solid #d4af37;
+            display: none;
+        }
+
+        .dedication-section.show {
+            display: block;
+            animation: fadeInScale 1s ease 0.5s backwards;
+        }
+
+        .dedication-text {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .dedication-text i {
+            color: #d4af37;
+            margin: 0 8px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .envelope-wrapper {
+                max-width: 320px;
+                height: 420px;
+            }
+
+            .mailbox-post {
+                height: 150px;
+            }
+
+            .mailbox-base {
+                bottom: 150px;
+                height: 220px;
+            }
+
+            .mailbox-door {
+                height: 140px;
+            }
+
+            .letter-preview {
+                height: 120px;
+                font-size: 1.1rem;
+            }
+
+            .letter-preview.pull-out {
+                transform: translateX(-50%) translateY(-240px) scale(1.05);
+            }
+
+            .heart-button {
+                width: 70px;
+                height: 70px;
+                bottom: 170px;
+            }
+
+            .heart-button i {
+                font-size: 32px;
+            }
+
+            .typed-message {
+                font-size: 1.4rem;
+            }
+
+            .open-letter-btn {
+                padding: 14px 35px;
+                font-size: 1.1rem;
+            }
+
+            .letter-content {
+                padding: 40px 30px;
+            }
+
+            .section-part h2 {
+                font-size: 1.6rem;
+            }
+
+            .section-part p {
+                font-size: 1.1rem;
+            }
+
+            .letter-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .cake-container {
+                width: 280px;
+                height: 380px;
+            }
+
+            .layer1 {
+                height: 100px;
+            }
+
+            .layer2 {
+                height: 90px;
+                bottom: 112px;
+            }
+
+            .layer3 {
+                height: 85px;
+                bottom: 202px;
+            }
+
+            .cake-title {
+                font-size: 1.6rem;
+                padding: 0 15px;
+            }
+
+            .cake-subtitle {
+                font-size: 1rem;
+                padding: 0 15px;
+            }
+
+            .final-message {
+                padding: 35px 25px;
+            }
+
+            .final-message p {
+                font-size: 1.1rem;
+            }
+
+            .signature {
+                font-size: 1.5rem;
+            }
+
+            .video-container,
+            .dedication-section {
+                padding: 25px 20px;
+                margin: 30px 15px 0;
+            }
+
+            .video-title,
+            .dedication-text {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .envelope-wrapper {
+                max-width: 280px;
+                height: 380px;
+            }
+
+            .mailbox-base {
+                height: 200px;
+            }
+
+            .typed-message {
+                font-size: 1.2rem;
+            }
+
+            .nav-button {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+            }
+
+            .progress-dots {
+                gap: 6px;
+            }
+
+            .dot {
+                width: 10px;
+                height: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- PANTALLA DE BUZÓN -->
+    <div class="envelope-screen" id="envelopeScreen">
+        <div class="envelope-wrapper">
+            <div class="mailbox">
+                <div class="mailbox-post"></div>
+                <div class="mailbox-base">
+                    <div class="mailbox-top"></div>
+                    <div class="mailbox-window"></div>
+                    <div class="letter-preview" id="letterPreview">
+                        Para ti, mi amor 🤍
+                    </div>
+                    <div class="mailbox-door" id="mailboxDoor">
+                        <div class="door-handle"></div>
+                    </div>
+                </div>
+                <div class="heart-button" id="heartButton">
+                    <i class="fas fa-heart"></i>
+                </div>
+            </div>
+        </div>
+        <div class="typed-message" id="typedMessage"></div>
+        <button class="open-letter-btn" id="openLetterBtn">
+            <i class="fas fa-envelope-open-text"></i> Ábreme
+        </button>
+    </div>
+
+    <!-- PANTALLA DE CARTA -->
+    <div class="letter-screen" id="letterScreen">
+        <div class="letter-container">
+            <div class="letter-header">
+                <h1><i class="fas fa-heart"></i> Mi carta para ti <i class="fas fa-heart"></i></h1>
+                <p class="subtitle">Con todo mi amor, Daniel</p>
+            </div>
+
+            <div class="letter-content">
+                <!-- Sección 1 -->
+                <div class="section-part active" data-section="1">
+                    <h2><i class="fas fa-heart"></i> Mi amor...</h2>
+                    <p>Si estás leyendo esto es porque hoy celebro lo más bonito que me pasó en la vida: tú, mi niño, mi corazón.</p>
+                    <p>Hoy no celebro solo tu cumpleaños, celebro tu existencia, tu forma de amar y la manera tan bonita en la que llegaste a mi vida para quedarte.</p>
+                </div>
+
+                <!-- Sección 2 -->
+                <div class="section-part" data-section="2">
+                    <h2><i class="fas fa-star"></i> Cómo nos conocimos</h2>
+                    <p>Yo te conocí en septiembre de 2024, cuando estabas con tus amigos por los 400. No fue un día cualquiera, Dani. Desde ese momento sentí algo muy claro dentro de mí, algo que nunca antes había sentido con tanta certeza: "él será".</p>
+                    <p>Y aunque quizá en ese instante no lo sabías, mi corazón ya había tomado una decisión.</p>
+                    <p>Después nuestra historia empezó a construirse poco a poco, con ese juego de la ventana, con miradas tímidas, nervios y curiosidad. Tú empezaste a conocerme y yo empecé a descubrirte.</p>
+                </div>
+
+                <!-- Sección 3 -->
+                <div class="section-part" data-section="3">
+                    <h2><i class="fas fa-coffee"></i> Nuestra primera cita</h2>
+                    <p>Nuestra primera cita en esa cafetería fue simplemente mágica. Ese día entendí algo muy especial: no es que me guste la torta vasca... es que me gusta comerla contigo, mi niño.</p>
+                    <p>Ese café tan feo que pediste de naranja aún lo recuerdo, pero lo que más se quedó en mí fue tu sonrisa, tu ilusión y la forma tan bonita en la que llegaste con el collar de tulipán.</p>
+                    <p>El espejo, la figura de Dumbledore y la lámpara de rosas se convirtieron en recuerdos imborrables. Más que objetos, son símbolos de nuestro inicio, de ese primer capítulo tan nuestro que siempre llevaré en el corazón, Dani.</p>
+                </div>
+
+                <!-- Sección 4 -->
+                <div class="section-part" data-section="4">
+                    <h2><i class="fas fa-book-heart"></i> Lo que me enseñaste</h2>
+                    <p>Quiero agradecerte algo muy profundo, mi corazón. Gracias por enseñarme a amar a alguien fuera de mi familia. Gracias por mostrarme que el amor no solo se hereda, también se aprende, se construye y se elige cada día.</p>
+                    <p>Contigo aprendí a confiar, a abrir mi corazón sin miedo y a ser vulnerable sin sentirme débil. Me enseñaste que amar también es paciencia, diálogo, comprensión y presencia.</p>
+                    <p>Aprendí contigo que el amor no es perfecto, pero sí sincero; que no siempre es fácil, pero cuando es real, siempre vale la pena.</p>
+                </div>
+
+                <!-- Sección 5 -->
+                <div class="section-part" data-section="5">
+                    <h2><i class="fas fa-hand-holding-heart"></i> Momentos difíciles que superamos</h2>
+                    <p>No todo fue sencillo, y eso también nos hizo crecer. Pasamos por miedos, bloqueos y por el proceso de acostumbrarnos a tener una pareja, a compartir emociones, tiempos y silencios.</p>
+                    <p>Aprendimos a dialogar, a escucharnos y a tenernos paciencia incluso cuando costaba. Aprendimos a quedarnos, a elegirnos día tras día y a enfrentar juntos las incertidumbres del día a día.</p>
+                    <p>Cada dificultad nos hizo más fuertes, más conscientes y más unidos, mi niño.</p>
+                </div>
+
+                <!-- Sección 6 -->
+                <div class="section-part" data-section="6">
+                    <h2><i class="fas fa-sun"></i> Hoy</h2>
+                    <p>Hoy puedo decir con tranquilidad que hemos superado muchas adversidades. Hoy somos felices juntos, nos cuidamos, nos consentimos y nos recordamos constantemente que valemos la pena.</p>
+                    <p>Cada día somos un poco más felices y eso llena mi alma de una forma que no sabía que existía. Disfruto cada momento contigo, Dani: nuestras comidas, nuestras risas, nuestra compañía y hasta lo más simple.</p>
+                    <p>Porque contigo, lo cotidiano se vuelve especial.</p>
+                </div>
+
+                <!-- Sección 7 -->
+                <div class="section-part" data-section="7">
+                    <h2><i class="fas fa-rainbow"></i> Nuestro futuro</h2>
+                    <p>Sueño con hacerte muy feliz, mi corazón. Sueño con que juntos superemos todos los obstáculos que la vida nos ponga, que conozcamos el mundo, que comamos delicioso siempre y que construyamos nuestro hogar con nuestros dos gatos, tu gato de 5 millones y nuestro golden retriever.</p>
+                    <p>Sueño con que los dos nos graduemos, que cada uno avance en sus sueños con el apoyo del otro y que crezcamos juntos sin soltarnos la mano.</p>
+                    <p>Quiero que lleguemos muy, muy lejos en esta vida, Dani, siempre juntos, siempre eligiéndonos.</p>
+                </div>
+            </div>
+
+            <div class="letter-navigation">
+                <button class="nav-button" id="prevBtn" disabled>
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <div class="progress-dots" id="progressDots"></div>
+                <button class="nav-button" id="nextBtn">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DEL PASTEL -->
+    <div class="cake-section" id="cakeSection">
+        <h1 class="cake-title"><i class="fas fa-star"></i> 22 años de una persona increíble <i class="fas fa-star"></i></h1>
+        <p class="cake-subtitle">Naciste el 18 de enero... aunque el mundo te conoció oficialmente el 20</p>
+
+        <div class="cake-container">
+            <div class="cake">
+                <div class="cake-plate"></div>
+                <i class="fas fa-star cake-topper"></i>
+
+                <div class="cake-layer layer1">
+                    <div class="frosting"></div>
+                </div>
+
+                <div class="cake-layer layer2">
+                    <div class="frosting"></div>
+                </div>
+
+                <div class="cake-layer layer3">
+                    <div class="frosting"></div>
+                    <div class="candles-container" id="candles"></div>
+                </div>
+            </div>
+        </div>
+
+        <p class="blow-instruction" id="blowText"><i class="fas fa-hand-pointer"></i> Haz clic en cada vela para soplarla <i class="fas fa-hand-pointer"></i></p>
+
+        <div class="final-message" id="finalMessage">
+            <p>Feliz cumpleaños, amor mío. Hoy celebro el día en que nació la persona que transformó mi manera de amar. Celebro tu vida, tu corazón tan noble y todo lo que eres.</p>
+            <p>Deseo que este nuevo año te regale calma, sueños cumplidos, aprendizajes bonitos y muchas razones para sonreír. Que la vida te devuelva en felicidad todo lo bueno que entregas.</p>
+            <p>Gracias, mi niño, por tu paciencia, por tu ternura y por tu forma tan sincera de cuidarme. Gracias por demostrarme que el amor se construye con hechos, con constancia y con presencia.</p>
+            <p>Me siento profundamente orgullosa de la persona que eres y de todo lo que estás construyendo. Verte crecer, esforzarte y no rendirte me inspira más de lo que imaginas.</p>
+            <p class="signature"><i class="fas fa-heart"></i> Feliz cumpleaños, Daniel <i class="fas fa-heart"></i><br>Hoy, mañana y siempre... yo contigo</p>
+        </div>
+
+        <!-- Video que se reproduce automáticamente -->
+        <div class="video-container" id="autoVideo">
+            <h3 class="video-title"><i class="fas fa-music"></i> Una canción para ti <i class="fas fa-music"></i></h3>
+            <div class="video-wrapper">
+                <div id="videoPlaceholder1" style="background: linear-gradient(135deg, #4682B4, #87CEEB); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; border-radius: 8px;">
+                    <i class="fas fa-music" style="font-size: 60px; color: white; margin-bottom: 20px;"></i>
+                    <p style="color: white; font-size: 1.3rem; margin-bottom: 20px; text-align: center; padding: 0 20px;">Tu canción especial te está esperando</p>
+                    <a href="https://www.youtube.com/watch?v=CySWfXWxuBY" target="_blank" style="background: white; color: #4682B4; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-family: Georgia; font-size: 1.2rem; box-shadow: 0 5px 20px rgba(0,0,0,0.3); transition: all 0.3s ease;">
+                        <i class="fas fa-play-circle"></i> Ver en YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de dedicatoria -->
+        <div class="dedication-section" id="dedicationSection">
+            <p class="dedication-text">
+                <i class="fas fa-heart"></i>
+                Esta canción también es para ti, mi amor.
+                <br>
+                Te la dedico con todo mi corazón
+                <i class="fas fa-heart"></i>
+            </p>
+            <div class="video-wrapper">
+                <div id="videoPlaceholder2" style="background: linear-gradient(135deg, #87CEEB, #B0E0E6); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; border-radius: 8px;">
+                    <i class="fas fa-heart" style="font-size: 60px; color: #d4af37; margin-bottom: 20px;"></i>
+                    <p style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 20px; text-align: center; padding: 0 20px;">Una dedicatoria musical</p>
+                    <a href="https://www.youtube.com/watch?v=ovmz-QFZfAU" target="_blank" style="background: #4682B4; color: white; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-family: Georgia; font-size: 1.2rem; box-shadow: 0 5px 20px rgba(0,0,0,0.3); transition: all 0.3s ease;">
+                        <i class="fas fa-play-circle"></i> Ver en YouTube
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSection = 1;
+        const totalSections = 7;
+        let candlesBlown = 0;
+        const totalCandles = 11;
+
+        // ANIMACIÓN DE TEXTO TIPOGRÁFICO
+        const message = "Tengo algo especial para ti, mi amor...";
+        const typedMessage = document.getElementById('typedMessage');
+        let i = 0;
+
+        function typeWriter() {
+            if (i < message.length) {
+                typedMessage.textContent += message.charAt(i);
+                i++;
+                setTimeout(typeWriter, 80);
+            } else {
+                setTimeout(() => {
+                    document.getElementById('openLetterBtn').classList.add('show');
+                }, 500);
+            }
+        }
+
+        // ABRIR BUZÓN CON BOTÓN CORAZÓN
+        document.getElementById('heartButton').addEventListener('click', function () {
+            this.style.opacity = '0';
+
+            setTimeout(() => {
+                this.style.display = 'none';
+                document.getElementById('mailboxDoor').classList.add('open');
+            }, 300);
+
+            setTimeout(() => {
+                document.getElementById('letterPreview').classList.add('pull-out');
+            }, 700);
+
+            setTimeout(() => {
+                typeWriter();
+            }, 2000);
+        });
+
+        // ABRIR CARTA
+        document.getElementById('openLetterBtn').addEventListener('click', function () {
+            document.getElementById('envelopeScreen').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('envelopeScreen').style.display = 'none';
+                document.getElementById('letterScreen').classList.add('active');
+                createProgressDots();
+            }, 800);
+        });
+
+        // CREAR PUNTOS DE PROGRESO
+        function createProgressDots() {
+            const dotsContainer = document.getElementById('progressDots');
+            for (let i = 1; i <= totalSections; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i === 1) dot.classList.add('active');
+                dot.dataset.section = i;
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        // ACTUALIZAR SECCIÓN
+        function updateSection() {
+            document.querySelectorAll('.section-part').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            document.querySelector(`[data-section="${currentSection}"]`).classList.add('active');
+
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                if (index + 1 === currentSection) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+
+            document.getElementById('prevBtn').disabled = currentSection === 1;
+
+            if (currentSection === totalSections) {
+                document.getElementById('nextBtn').innerHTML = '<i class="fas fa-birthday-cake"></i> Celebremos';
+            } else {
+                document.getElementById('nextBtn').innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+            }
+        }
+
+        // NAVEGACIÓN
+        document.getElementById('prevBtn').addEventListener('click', function () {
+            if (currentSection > 1) {
+                currentSection--;
+                updateSection();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', function () {
+            if (currentSection < totalSections) {
+                currentSection++;
+                updateSection();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showCake();
+            }
+        });
+
+        // MOSTRAR PASTEL
+        function showCake() {
+            document.getElementById('letterScreen').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('letterScreen').style.display = 'none';
+                document.getElementById('cakeSection').classList.add('active');
+                createCandles();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+        }
+
+        // CREAR VELAS
+        function createCandles() {
+            const candlesContainer = document.getElementById('candles');
+            for (let i = 0; i < totalCandles; i++) {
+                const candle = document.createElement('div');
+                candle.className = 'candle';
+                candle.innerHTML = '<div class="wick"></div><div class="flame"></div>';
+                candle.onclick = function () { blowCandle(this); };
+                candlesContainer.appendChild(candle);
+            }
+        }
+
+        // SOPLAR VELA
+        function blowCandle(candle) {
+            const flame = candle.querySelector('.flame');
+            if (!flame.classList.contains('blown')) {
+                flame.classList.add('blown');
+                candlesBlown++;
+
+                if (candlesBlown === totalCandles) {
+                    setTimeout(() => {
+                        document.getElementById('blowText').style.display = 'none';
+                        document.getElementById('finalMessage').classList.add('show');
+
+                        // Mostrar el primer video
+                        setTimeout(() => {
+                            document.getElementById('autoVideo').classList.add('show');
+                            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                        }, 1500);
+
+                        // Mostrar la dedicatoria después
+                        setTimeout(() => {
+                            document.getElementById('dedicationSection').classList.add('show');
+                        }, 3000);
+                    }, 1000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
